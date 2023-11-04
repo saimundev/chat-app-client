@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import {
   Form,
   FormControl,
@@ -13,52 +14,66 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { useSignInMutation } from "@/store/api/userApi";
-import { SignInProps } from "@/types/AuthProps";
 import EyeOpenIcon from "../icon/EyeOpenIcon";
+import { useEffect, useState } from "react";
 import EyeCloseIcon from "../icon/EyeCloseIcon";
+import { useToast } from "@/components/ui/use-toast";
+import { useSignUpMutation } from "@/store/api/userApi";
+import { SignUpProps } from "@/types/AuthProps";
 import { useAppDispatch } from "@/store/hooks";
 import { getUser } from "@/store/features/authSlice";
 import { setCookie } from 'cookies-next';
 import Container from "../shared/Container";
 import Link from "next/link";
 
-const FormSchema = z.object({
-  email: z
-    .string()
-    .min(6, {
-      message: "email must be at least 6 characters.",
-    })
-    .max(30, { message: "email must be max 30 characters" })
-    .email(),
-  password: z
-    .string()
-    .min(5, {
-      message: "password must be at least 5 characters.",
-    })
-    .regex(new RegExp(".*[A-Z].*"), "One uppercase character")
-    .regex(new RegExp(".*[a-z].*"), "One lowercase character")
-    .regex(new RegExp(".*\\d.*"), "One number")
-    .regex(
-      new RegExp(".*[`~<>?,./!@#$%^&*()\\-_+=\"'|{}\\[\\];:\\\\].*"),
-      "One special character"
-    ),
-});
+const FormSchema = z
+  .object({
+    name: z
+      .string()
+      .min(3, {
+        message: "name must be at least 3 characters.",
+      })
+      .max(30, { message: "name must be max 30 characters" }),
+    email: z
+      .string()
+      .min(6, {
+        message: "email must be at least 6 characters.",
+      })
+      .max(30, { message: "email must be max 30 characters" })
+      .email(),
+    password: z
+      .string()
+      .min(5, {
+        message: "password must be at least 5 characters.",
+      })
+      .regex(new RegExp(".*[A-Z].*"), "One uppercase character")
+      .regex(new RegExp(".*[a-z].*"), "One lowercase character")
+      .regex(new RegExp(".*\\d.*"), "One number")
+      .regex(
+        new RegExp(".*[`~<>?,./!@#$%^&*()\\-_+=\"'|{}\\[\\];:\\\\].*"),
+        "One special character"
+      )
+  })
 
-const SignIn = () => {
+const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const router = useRouter();
-  const [loginUser, { isSuccess, isLoading, error, data }] =
-    useSignInMutation();
+  const route = useRouter();
+  const [createUser, { isSuccess, isLoading, error, data }] =
+    useSignUpMutation();
   const dispatch = useAppDispatch();
+
 
   //error message
   useEffect(() => {
@@ -74,44 +89,66 @@ const SignIn = () => {
   useEffect(() => {
     if (isSuccess) {
       toast({
-        title: "Login successful",
+        title: "Account create successful",
         variant: "success",
       });
 
-      router.push("/");
+      route.push("/email-verification");
 
       //store data in cookie storage
       setCookie("userToken", (data as any)?.token)
       dispatch(getUser((data as any)?.token))
+
     }
   }, [isSuccess]);
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     //user object
-    const loginUserData: SignInProps = {
+    const newUser: SignUpProps = {
+      name: data.name,
       email: data.email,
       password: data.password,
     };
 
     //create user
-    loginUser(loginUserData);
+    createUser(newUser);
   };
+
+
+
 
   return (
     <div className="h-screen bg-bgColor">
       <Container>
-        <div className="grid grid-cols-[1fr_1fr] items-center h-screen ">
+        <div className="grid grid-cols-[1fr_1fr] items-center h-screen">
           <div className="text-center">
             <h1 className="text-4xl text-white font-bold">Welcome to FriendZone</h1>
             <h3 className="text-2xl text-white mt-3">Connect Your Friend And Family</h3>
           </div>
-          <Card>
+
+          {/* sign up form */}
+          <Card className="">
             <CardHeader>
-              <CardTitle>Login to your account</CardTitle>
+              <CardTitle className="text-bgColor font-bold">Create your account</CardTitle>
             </CardHeader>
-            <CardContent className="pb-1">
+            <CardContent>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                  {/* name field */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   {/* email field */}
                   <FormField
                     control={form.control}
@@ -158,6 +195,8 @@ const SignIn = () => {
                     )}
                   />
 
+                  
+
                   <Button disabled={isLoading} type="submit" className="w-full !mt-6">
                     {isLoading ? "Loading..." : "Submit"}
                   </Button>
@@ -165,13 +204,10 @@ const SignIn = () => {
               </Form>
             </CardContent>
 
-            <CardFooter className="flex justify-center flex-col">
-
-              <Button asChild variant="success" className="mt-6">
-                <Link href="sign-up">Create Account</Link>
+            <CardFooter className="flex justify-center">
+              <Button asChild variant="link" className="">
+                <Link href="sign-in">Already have account? Sing-up plese</Link>
               </Button>
-
-
             </CardFooter>
           </Card>
         </div>
@@ -180,4 +216,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;

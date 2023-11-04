@@ -1,0 +1,23 @@
+import React from 'react'
+import { Button } from '../ui/button'
+
+const ProfileCart = () => {
+  return (
+    <div className="">
+      <div className="border border-bgColor rounded">
+        <div className="">
+          <img className='w-full h-52 object-cover' src="https://e0.pxfuel.com/wallpapers/137/952/desktop-wallpaper-facebook-cover-love-lovely-nice-cool-touch-beauty.jpg" alt="" />
+         <div className="flex">
+           <img className="w-44 h-44 object-cover  rounded-full" src="data:image/jpeg;base64,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" alt="" />
+            <h2>Saimun islam</h2>
+            <h4>140 Follower</h4>
+         </div>
+        </div>
+
+       
+      </div>
+    </div>
+  )
+}
+
+export default ProfileCart

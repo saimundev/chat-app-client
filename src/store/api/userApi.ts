@@ -4,6 +4,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 export const userApi = createApi({
     reducerPath: 'userApi',
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5050/api/' }),
+    
     endpoints: (builder) => ({
 
       signUp: builder.mutation<SignUpProps, SignUpProps>({
@@ -12,6 +13,7 @@ export const userApi = createApi({
             url:"auth/sign-up",
             body:data
         }),
+        
       }),
 
       signIn: builder.mutation<SignInProps, SignInProps>({
@@ -30,9 +32,17 @@ export const userApi = createApi({
       }),
 
 
+      getUser: builder.query({
+        query: ({friendId}) => ({
+            method:"GET",
+            url:`auth/get-user/${friendId}`,
+        }),
+      }),
+
+
     }),
   })
 
 
 
-  export const { useSignUpMutation,useSignInMutation,useEmailVerificationMutation } = userApi
+  export const { useSignUpMutation,useSignInMutation,useEmailVerificationMutation,useGetUserQuery } = userApi

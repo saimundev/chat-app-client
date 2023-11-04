@@ -1,11 +1,10 @@
-import SignUp from '@/components/auth/SignUp'
+import CreateUser from '@/components/create-user/CreateUser'
 import React from 'react'
-
 
 const page = () => {
   return (
     <div>
-        <SignUp/>
+      <CreateUser/>
     </div>
   )
 }

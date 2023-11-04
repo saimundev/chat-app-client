@@ -1,18 +1,10 @@
-"use client";
-import { deleteCookie } from "cookies-next";
-import { useRouter } from "next/navigation";
-export default function Home() {
-  const router = useRouter();
+import User from "@/components/user/User";
 
-  //handel logout
-  const handleLogout = () => {
-    deleteCookie("userToken");
-    router.push("/sign-in")
-  };
+export default function Home() {
+
   return (
     <main>
-      <h1>home page</h1>
-      <button onClick={handleLogout}>LogOut</button>
+      <User/>
     </main>
   );
 }
